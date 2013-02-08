@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<translations>
+<page name="Home">
+	<en>page.aspx?pid=914</en>
+	<fr>page.aspx?pid=915</fr>
+	<es>page.aspx?pid=916</es>
+</page>
+<page name="Donation">
+	<en>sslpage.aspx?pid=1261</en>
+	<fr>sslpage.aspx?pid=1259</fr>
+	<es>sslpage.aspx?pid=1263</es>
+</page>
+</translations>

@@ -1,0 +1,48 @@
+<!-- PLUGINS -->
+<!-- =================================================== -->
+<!-- COOKIE PLUGIN -->
+<script src="cookie.plugin.js"></script>
+<!-- SESSVARS PLUGIN -->
+<script src="sessvars.plugin.js"></script>
+<!-- PAGEMAPPER PLUGIN -->
+<script src="pageMapper.plugin.js"></script>
+<!-- LOCALIZE PARTS PLUGIN -->
+<script src="localizeParts.plugin.js"></script>
+
+
+<!-- CLASSES -->
+<!-- =================================================== -->
+<!-- PAGEHELPER CLASS -->
+<script src="PageHelper.class.js"></script>
+<!-- LOCALIZER CLASS -->
+<script src="Localizer.class.js"></script>
+
+
+<!-- UNFORMATTED TEXT PART -->
+<!-- =================================================== -->
+<!-- HIDE BBNC FORMS -->
+<style>.BBFormTable {display:none;}</style>
+
+<!-- SHOW LOADING INDICATOR -->
+<div class="loader">Chargement...</div>
+
+<!-- INSTANTIATE LOCALIZER -->
+<script>
+Sys.WebForms.PageRequestManager.getInstance().add_pageLoaded(function() {
+	$(document).ready(function(){
+	
+		var localizer = new Localizer({
+			container: '#wrapContentOuter',
+			frenchUrlKeyword: '/fr/',
+			bbncParts: {
+				popupCSC: 'popup.html',
+				termsJSON: 'localizeParts.json',
+			},
+			pageMapper: {
+				root: 'en=='+location.protocol+'//www.domain.org/en/,fr=='+location.protocol+'//www.domain.org/fr/,es=='+location.protocol+'//www.domain.org/es/'
+			}
+		});
+		
+	});
+});
+</script>
