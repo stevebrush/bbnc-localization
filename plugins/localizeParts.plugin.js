@@ -127,61 +127,6 @@
 						
 					});
 				}
-				
-				$('.hasDatepicker').each(function(){
-					var dateInput = $(this);
-					dateInput.hide();
-					var thisParent = $(this).parent();
-					$('.ui-datepicker-trigger',thisParent).hide();
-					if ($('.dateInputFix',thisParent).length == 0) {
-						$(this).after('<input class="dateInputFix"/>'); 
-					}
-					$('.dateInputFix',thisParent).each(function(){		 
-						var elSplits = dateInput.val().split('/');
-						if (elSplits.length == 3) {
-							var m = elSplits[0];
-							var d = elSplits[1];
-							var y = elSplits[2];
-							var display = '';
-							var dateSplit = numDateFormat.split('');
-							$.each(dateSplit,function(i,s){				
-								var dateVal = '';
-								if (s == "m") dateVal = m;
-								else if (s == "d") dateVal = d;
-								else if (s == "y") dateVal = y;
-								else dateVal = s;
-								if (dateVal != null) display = display+dateVal;
-							});	
-							var dateOutput = display;
-							$(this).val(dateOutput);	
-						}
-					});
-					$('.dateInputFix',thisParent).change(function(){
-						var elSplits = $(this).val().split('/');
-						if (elSplits.length == 3) {
-							var d = elSplits[0];
-							var m = elSplits[1];
-							var y = elSplits[2];
-							var display = '';
-							var dateSplit = ['m','/','d','/','y'];
-							$.each(dateSplit,function(i,s){				
-							
-								var dateVal = '';
-								
-								if (s == "m") dateVal = m;
-								else if (s == "d") dateVal = d;
-								else if (s == "y") dateVal = y;
-								else dateVal = s;
-								
-								if (dateVal != null) display = display+dateVal;
-							
-							});		  
-							var dateOutput = display;
-							dateInput.val(dateOutput);	
-						}
-					});
-				});
-				
 			},
 			
 			formatDates: function(part) {
@@ -210,78 +155,131 @@
 						thisElement.text(display);
 					}
 				});
+				var dateInput, thisParent;
+				$('input[id*="DatePickerStart"]').each(function(i){
+					dateInput = $(this).hide();
+					thisParent = dateInput.parent();
+					$('.ui-datepicker-trigger',thisParent).hide();
+					if (!$('.dateInputFix',thisParent).length) {
+						$(this).after('<input class="dateInputFix" value="" />'); 
+					}
+				});
+				$('.dateInputFix',thisParent).each(function(){	 
+					var newInput = $(this);
+					function formatCurr() {
+						var elSplits = dateInput.val().split('/');
+						if (elSplits.length == 3) {
+							var m = elSplits[0];
+							var d = elSplits[1];
+							var y = elSplits[2];
+							var display = '';
+							var dateSplit = numDateFormat.split('');
+							$.each(dateSplit,function(i,s){				
+								var dateVal = '';
+								if (s == "m") dateVal = m;
+								else if (s == "d") dateVal = d;
+								else if (s == "y") dateVal = y;
+								else dateVal = s;
+								if (dateVal != null) display = display+dateVal;
+							});	
+							var dateOutput = display;
+							newInput.val(dateOutput);	
+						}
+					}
+					formatCurr();
+				});
 			},
 			
 			formatCurrency: function(part) {
+			
+				var currencyInstances,
+					updatedCurrencyAmount,
+					data,
+					currSplit = currencyFormat.split('/');
+					
+				var updatedCurrency,currency,dollars,dollarsBefore,cents,centsAfter;
+			
 				$.each(CURRENCY_CONTAINERS, function(i,_element) {
 				
 					// Loop through those elements that do, in fact, contain currency: 
 					$(part).find(_element+':contains("$")').each(function(a) {
 						
+						currencyInstances = $(this).text().split(';');
+						
 						// If currency has a matching number with it...
 						if ($(this).text() != '$') {
-						
-							var currencyInstances 	= $(this).text().split(';'),
-								updatedCurrency 	= '';
-								
+
 							// Loop through all instances of the currency:
-							$.each(currencyInstances, function(i,curr) {
-	
-								if (typeof curr != "undefined") {
+							$.each(currencyInstances, function(i, string) {
 								
-									var cents = (curr.match('.')) ? curr.split('.')[1] : '';
-									if (typeof cents != "undefined") {
-										if (cents.split('').length > 2) cents = cents.substr(0,2);
+								updatedCurrency = "";
+								
+								if (typeof string != "undefined") {
+									
+									currency = string.split('$');
+									for (var i = 0; i<currency.length; i++) {
+										if (currency[i] != "") {
 										
-										var dollars 			= curr.split('.')[0].split('$')[1],
-											stringBeforeAmount 	= curr.split('.')[0].split('$')[0],
-											stringAfterAmount 	= curr.split('.')[1].replace(cents,'');
-											if (stringAfterAmount == null) stringAfterAmount = '';
+											updatedCurrencyAmount = "";
 										
-										var updatedCurrencyAmount 	= '',
-											data 					= '',
-											currSplit 				= currencyFormat.split('/');
-										
-										// a = symbol
-										// b = delimiter
-										// c = decimal
-										// cx = hide cents if .00
-										
-										$.each(currSplit, function(i,s) {
-										
-											// Get Symbol:
-											if (s.match('a')) data = s.replace('a','');
-											
-											// Get Delimiter:
-											else if (s.match('b')) data = dollars.replace(/,/g,s).replace('b','');
-											
-											// Get Decimal:
-											else if (s.match('c')) { 
-												if ((s.match('x')) && (cents == '00')) {
-													data = '';
-												} else if (cents != '00') {
-													data = (s.replace('c','').replace('x',''))+cents;
-												} else if (!s.match('x')) {
-													data = s.replace('c','')+cents;
-												}			
-											} else { 
-												data = '';
+											dollars = currency[i].split('.')[0];
+											dollarsBefore = currency[i].split(dollars)[0] || '';
+											if (typeof currency[i].split('.')[1] != "undefined") {
+												cents = currency[i].split('.')[1].substr(0,2);
+												centsAfter = currency[i].split('.')[1].split(cents)[1];
 											}
 											
-											// Update currency amount string:
-											if (data != null) {
-												updatedCurrencyAmount += data;
+											// a = symbol
+											// b = delimiter
+											// c = decimal
+											// cx = hide cents if .00
+											if (dollars != "" && cents != "") {
+												$.each(currSplit, function(i, s) {
+												
+													// Get Symbol:
+													if (s.match('a')) {
+														data = s.replace('a','');
+													}
+													
+													// Get Delimiter:
+													else if (s.match('b')) {
+														data = s.replace('b',dollars);
+													}
+													
+													// Get Decimal:
+													else if (s.match('c')) { 
+														if (s.match('x') && (cents == '00')) {
+															data = '';
+														} else if (s.match('x') && (cents != '00')) {
+															data = s.replace('c',cents).replace('x','');
+														} else if (!s.match('x')) {
+															data = s.replace('c',cents);
+														}			
+													} else { 
+														data = '';
+													}
+													
+													// Update currency amount string:
+													if (data != null) {
+														updatedCurrencyAmount += data;
+													}
+													
+												});
 											}
-										});		
-										var currOutput = stringBeforeAmount+updatedCurrencyAmount+stringAfterAmount;
-										updatedCurrency = updatedCurrency+currOutput;
+											
+											updatedCurrency += dollarsBefore+updatedCurrencyAmount+centsAfter;
+										}
 									}
 								}
+								
 							});
-							$(this).text(updatedCurrency);
+							if (updatedCurrency != "") {
+								$(this).text(updatedCurrency);
+							}
 						}
 					});
 				});	
+				
 			},
 			
 			fixDollarInputFields: function(o) {
@@ -335,14 +333,32 @@
 										var oldPhrase 	= this["English"],
 											newPhrase 	= this[translateTo],
 											selectors 	= selector.split(','),
-											elements;
+											nodes, node, nodesLength, text, escapedKey, regex;
+										
+										
 										
 										for (var i=0; i<selectors.length; i++) {
-											elements = $(container).find($.trim(selectors[i])+' '+this["Element"]+':contains("'+oldPhrase+'")');
-											$.each(elements, function() {
-												if ($(this).length) $(this).html($(this).html().replace(oldPhrase,newPhrase));
+										
+											var thisPart = $(container).find($.trim(selectors[i]));
+										
+											if (!thisPart.length) continue;
+										
+											nodes = thisPart.find(this["Element"]).andSelf().contents().filter(function() {
+												return this.nodeType == 3 && trim(this.data) != "" && this.data.indexOf(oldPhrase)>-1;
 											});
+											if (nodes.length) {
+												nodesLength = nodes.length;
+												for (var n=0; n<nodesLength; n++) {
+													node = nodes[n];
+													text = node.data;
+													escapedKey = RegExp.escape(oldPhrase);
+													regex = new RegExp(escapedKey,'g');
+													node.nodeValue = text.replace(regex,newPhrase);
+												}
+											}
 										}
+										
+										
 									});
 								}
 							});
@@ -470,3 +486,7 @@
 		
 	};
 })(jQuery);
+
+RegExp.escape = function(s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+};
